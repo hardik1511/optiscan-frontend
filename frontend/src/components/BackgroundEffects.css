@@ -1,0 +1,48 @@
+.background-effects-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    overflow: hidden;
+    background-color: var(--bg-color);
+}
+
+.color-bleeds {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 80% 10%, rgba(124, 111, 205, 0.04) 0%, transparent 40%),
+        /* Dusty violet/blush bleed */
+        radial-gradient(circle at 10% 90%, rgba(90, 158, 124, 0.04) 0%, transparent 40%);
+    /* Soft sage/mint bleed */
+}
+
+.linen-texture {
+    position: absolute;
+    inset: 0;
+    opacity: 0.15;
+    /* Much lighter for SaaS feel vs MoMA feel */
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.5'/%3E%3C/svg%3E");
+    mix-blend-mode: multiply;
+}
+
+@keyframes meshShift {
+    0% {
+        transform: translate(0%, 0%) rotate(0deg) scale(1);
+    }
+
+    33% {
+        transform: translate(-5%, 5%) rotate(5deg) scale(1.05);
+    }
+
+    66% {
+        transform: translate(5%, -5%) rotate(-5deg) scale(0.95);
+    }
+
+    100% {
+        transform: translate(0%, 0%) rotate(0deg) scale(1);
+    }
+}

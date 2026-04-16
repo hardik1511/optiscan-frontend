@@ -1,174 +1,237 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Upload, Download, RefreshCw, Crosshair, AlertOctagon } from 'lucide-react';
+import { Upload, Download, RefreshCw, Crosshair, X, MapPin, AlertCircle, FileImage, Search } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const CURES = {
-    1: "General structural review recommended.",
-    2: "Apply structural epoxy or crack filler.",
+    1: "Requires structural conservation review.",
+    2: "Apply structural stabilizing filler.",
     3: "Use abrasive polishing or mild solvent wipe.",
-    4: "Apply industrial solvent and power wash.",
-    5: "Assess for structural integrity; may require panel replacement.",
-    "Defect": "General structural review recommended.",
-    "Crack": "Apply structural epoxy or crack filler.",
+    4: "Requires specialized solvent treatment.",
+    5: "Assess for structural integrity; restoration recommended.",
+    "Defect": "Requires structural conservation review.",
+    "Crack": "Apply structural stabilizing filler.",
     "Scratch": "Use abrasive polishing or mild solvent wipe.",
-    "Stain": "Apply industrial solvent and power wash.",
-    "Dent": "Assess for structural integrity; may require panel replacement."
+    "Stain": "Requires specialized solvent treatment.",
+    "Dent": "Assess for structural integrity; restoration recommended."
 };
 
 const LABEL_MAP = {
     1: "Defect", 2: "Crack", 3: "Scratch", 4: "Stain", 5: "Dent"
 };
 
+const SEVERITY_COLORS = {
+    "Defect": "var(--warning)",
+    "Crack": "var(--critical)",
+    "Scratch": "var(--accent-teal)",
+    "Stain": "var(--warning)",
+    "Dent": "var(--critical)"
+};
+
 export default function DetectionUI() {
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [result, setResult] = useState(null);
-    const [loading, setLoading] = useState(false);
+    const [files, setFiles] = useState([]); // Array of { file, previewUrl, result, loading }
+    const [selectedIdx, setSelectedIdx] = useState(null); // The currently viewed image
+
+    // Global controls
+    const [loadingAll, setLoadingAll] = useState(false);
     const [confThreshold, setConfThreshold] = useState(0.5);
-    const [hoveredIndex, setHoveredIndex] = useState(null);
+
+    // Panel interactions
+    const [hoveredDefectIdx, setHoveredDefectIdx] = useState(null);
+    const [rightPanelOpen, setRightPanelOpen] = useState(false);
 
     const canvasRef = useRef(null);
-    const imageRef = useRef(null);
     const fileInputRef = useRef(null);
 
-    // Handle Image Upload
+    // Handle Image Upload (Batch selection)
     const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setSelectedFile(file);
-            setResult(null);
+        const newFiles = Array.from(e.target.files).map(f => ({
+            file: f,
+            previewUrl: URL.createObjectURL(f),
+            result: null,
+            loading: false
+        }));
+
+        setFiles(prev => [...prev, ...newFiles]);
+        if (selectedIdx === null && newFiles.length > 0) {
+            setSelectedIdx(0);
         }
     };
 
-    const handlePredict = async () => {
-        if (!selectedFile) return;
+    const removeFile = (idx, e) => {
+        e.stopPropagation();
+        setFiles(prev => prev.filter((_, i) => i !== idx));
+        if (selectedIdx === idx) {
+            setSelectedIdx(files.length > 1 ? 0 : null);
+            setRightPanelOpen(false);
+        } else if (selectedIdx > idx) {
+            setSelectedIdx(selectedIdx - 1);
+        }
+    };
 
-        setLoading(true);
+    const handlePredictBatch = async () => {
+        if (files.length === 0) return;
+        setLoadingAll(true);
+
+        // Filter files that haven't been analyzed yet
+        const unanalyzedFiles = files.filter(f => f.result === null);
+
+        if (unanalyzedFiles.length === 0) {
+            setLoadingAll(false);
+            return;
+        }
+
         const formData = new FormData();
-        formData.append("file", selectedFile);
+        unanalyzedFiles.forEach(f => formData.append("files", f.file));
 
         try {
-            const response = await fetch(`${API_BASE}/predict`, {
+            // Update UI to show loading on all unanalyzed cards
+            setFiles(prev => prev.map(f => f.result === null ? { ...f, loading: true } : f));
+
+            const response = await fetch(`${API_BASE}/predict/batch`, {
                 method: 'POST',
                 body: formData,
             });
 
-            if (!response.ok) {
-                throw new Error(`API Error: ${response.statusText}`);
-            }
+            if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
 
-            const data = await response.json();
-            setResult(data);
+            const resultsData = await response.json();
 
-            // Load image object for canvas redrawing
-            const img = new Image();
-            img.src = data.preview_base64;
-            img.onload = () => {
-                imageRef.current = img;
-                drawCanvas(data.instances, null);
-            };
+            // Map results back to files
+            setFiles(prev => {
+                let resultIdx = 0;
+                return prev.map(f => {
+                    if (f.result === null) {
+                        const data = resultsData[resultIdx++];
+                        return { ...f, result: data, loading: false };
+                    }
+                    return f;
+                });
+            });
+
+            setRightPanelOpen(true);
 
         } catch (err) {
             console.error(err);
-            alert("Error predicting image. Ensure backend is running.");
+            alert("Error predicting batch. Ensure backend is running.");
+            setFiles(prev => prev.map(f => ({ ...f, loading: false })));
         } finally {
-            setLoading(false);
+            setLoadingAll(false);
         }
     };
 
-    // Draw interactive Canvas
-    const drawCanvas = (instancesToDraw, hoverIdx) => {
+    const drawCanvas = (instancesToDraw, hoverIdx, previewBase64) => {
         const canvas = canvasRef.current;
-        if (!canvas || !imageRef.current) return;
+        if (!canvas || !previewBase64) return;
 
-        const ctx = canvas.getContext('2d');
-        const img = imageRef.current;
+        const img = new Image();
+        img.src = previewBase64;
 
-        canvas.width = img.width;
-        canvas.height = img.height;
+        img.onload = () => {
+            const ctx = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
 
-        // Draw base image
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
 
-        // Filter instances by score threshold
-        const filtered = instancesToDraw.filter(inst => inst.score >= confThreshold);
+            const instances = instancesToDraw.filter(inst => inst.score >= confThreshold);
 
-        // Highlight hovered box if exists
-        if (hoverIdx !== null && filtered[hoverIdx]) {
-            const inst = filtered[hoverIdx];
-            const [x1, y1, x2, y2] = inst.box;
-
-            ctx.save();
-            ctx.strokeStyle = '#00ffcc';
-            ctx.lineWidth = 4;
-            ctx.shadowColor = '#00ffcc';
-            ctx.shadowBlur = 15;
-            ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
-
-            ctx.fillStyle = 'rgba(0, 255, 204, 0.2)';
-            ctx.fillRect(x1, y1, x2 - x1, y2 - y1);
-        }
-
-        // Re-draw labels strongly over everything
-        filtered.forEach((inst, idx) => {
-            if (idx === hoverIdx) {
-                ctx.fillStyle = '#00ffcc';
-                ctx.font = 'bold 24px Arial';
+            // Draw thin editorial bounding boxes with floating labels
+            instances.forEach((inst, i) => {
+                const [x1, y1, x2, y2] = inst.box;
+                const isHovered = hoverIdx === i;
                 const labelName = LABEL_MAP[inst.label] || "Defect";
-                ctx.fillText(`${labelName} (${inst.score.toFixed(2)})`, inst.box[0], Math.max(inst.box[1] - 10, 20));
-            }
-        });
+                const colorName = SEVERITY_COLORS[labelName] || 'var(--ink)';
 
-        ctx.restore();
+                let color = '#B83232';
+                if (colorName === 'var(--critical)') color = '#C0392B';
+                else if (colorName === 'var(--warning)') color = '#D4840A';
+                else if (colorName === 'var(--success)') color = '#1A6B6B';
+                else if (colorName === 'var(--ink)') color = '#2A1F14';
+
+                // Add radial multiplication heatmap overlay on hover
+                if (isHovered) {
+                    const cx = x1 + (x2 - x1) / 2;
+                    const cy = y1 + (y2 - y1) / 2;
+                    const radius = Math.max(x2 - x1, y2 - y1);
+
+                    ctx.save();
+                    ctx.globalCompositeOperation = 'multiply';
+                    const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+                    gradient.addColorStop(0, `${color}20`); // 12.5% opacity
+                    gradient.addColorStop(1, 'transparent');
+                    ctx.fillStyle = gradient;
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                // Draw standard thin bounding box
+                ctx.beginPath();
+                ctx.rect(x1, y1, x2 - x1, y2 - y1);
+                ctx.lineWidth = isHovered ? 2 : 1.5;
+                ctx.strokeStyle = color;
+                ctx.stroke();
+
+                // Draw floating DM Mono label tag
+                ctx.font = '500 11px "DM Mono", monospace';
+                const textWidth = ctx.measureText(labelName.toUpperCase()).width + 12;
+
+                ctx.fillStyle = color;
+                ctx.fillRect(x1, y1 - 22, textWidth, 22);
+
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(labelName.toUpperCase(), x1 + 6, y1 - 10);
+            });
+        };
     };
 
-    // Redraw when threshold or hover changes
-    useEffect(() => {
-        if (result && result.instances) {
-            drawCanvas(result.instances, hoveredIndex);
-        }
-    }, [confThreshold, hoveredIndex, result]);
+    // Current viewed file context
+    const currentView = selectedIdx !== null ? files[selectedIdx] : null;
+    const currentResult = currentView?.result;
+    const currentLoading = currentView?.loading || false;
+    const currentFilteredInstances = currentResult ? currentResult.instances.filter(i => i.score >= confThreshold) : [];
 
-    // Handle canvas mousemove for glowing effect
+    useEffect(() => {
+        if (currentResult && currentResult.instances) {
+            drawCanvas(currentResult.instances, hoveredDefectIdx, currentResult.preview_base64);
+        }
+    }, [confThreshold, hoveredDefectIdx, currentResult, selectedIdx]);
+
     const handleCanvasMouseMove = (e) => {
-        if (!result || !canvasRef.current) return;
+        if (!currentResult || !canvasRef.current) return;
 
         const canvas = canvasRef.current;
         const rect = canvas.getBoundingClientRect();
 
-        // Scale coordinates to internal canvas array sizes
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
 
         const x = (e.clientX - rect.left) * scaleX;
         const y = (e.clientY - rect.top) * scaleY;
 
-        const filtered = result.instances.filter(inst => inst.score >= confThreshold);
-
         let foundIdx = null;
-        for (let i = 0; i < filtered.length; i++) {
-            const [x1, y1, x2, y2] = filtered[i].box;
+        for (let i = 0; i < currentFilteredInstances.length; i++) {
+            const [x1, y1, x2, y2] = currentFilteredInstances[i].box;
             if (x >= x1 && x <= x2 && y >= y1 && y <= y2) {
                 foundIdx = i;
                 break;
             }
         }
 
-        if (foundIdx !== hoveredIndex) {
-            setHoveredIndex(foundIdx);
+        if (foundIdx !== hoveredDefectIdx) {
+            setHoveredDefectIdx(foundIdx);
         }
     };
 
-    const handleCanvasMouseLeave = () => {
-        setHoveredIndex(null);
-    };
-
     const exportCSV = () => {
-        if (!result) return;
-        const filtered = result.instances.filter(inst => inst.score >= confThreshold);
+        if (!currentResult) return;
         let csv = "Type,Score,Box_X1,Box_Y1,Box_X2,Box_Y2\\n";
-        filtered.forEach(inst => {
+        currentFilteredInstances.forEach(inst => {
             const name = LABEL_MAP[inst.label] || "Defect";
             const [x1, y1, x2, y2] = inst.box;
             csv += `${name},${inst.score.toFixed(3)},${x1},${y1},${x2},${y2}\\n`;
@@ -178,7 +241,7 @@ export default function DetectionUI() {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `defects_${result.filename}.csv`;
+        a.download = `defects_${currentResult.filename}.csv`;
         a.click();
     };
 
@@ -191,11 +254,10 @@ export default function DetectionUI() {
         a.click();
     };
 
-    const filteredInstances = result ? result.instances.filter(i => i.score >= confThreshold) : [];
-
     return (
-        <div>
-            <div className="controls-bar glass-panel">
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '2rem' }}>
+            {/* Top Minimalist Command Bar */}
+            <div className="stagger-3 fade-in" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '1rem' }}>
                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                     <input
                         type="file"
@@ -203,104 +265,227 @@ export default function DetectionUI() {
                         ref={fileInputRef}
                         onChange={handleFileChange}
                         accept="image/*"
+                        multiple
                     />
                     <button className="btn-secondary" onClick={() => fileInputRef.current.click()}>
-                        <Upload size={18} /> Select Image
+                        <Upload size={16} /> Select Media
                     </button>
-
-                    <span style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
-                        {selectedFile ? selectedFile.name : "No file selected"}
-                    </span>
 
                     <button
                         className="btn-primary"
-                        onClick={handlePredict}
-                        disabled={!selectedFile || loading}
+                        onClick={handlePredictBatch}
+                        disabled={files.length === 0 || loadingAll || files.every(f => f.result !== null)}
+                        style={{ minWidth: '160px', justifyContent: 'center' }}
                     >
-                        {loading ? <RefreshCw className="spin" size={18} /> : <Crosshair size={18} />}
-                        Analyze
+                        {loadingAll ?
+                            <><div className="loader-arc" style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div> Analyzing...</> :
+                            files.every(f => f.result !== null) && files.length > 0 ?
+                                <><MapPin size={16} /> Complete</> :
+                                <><Search size={16} /> Analyze Batch</>
+                        }
                     </button>
+
+                    {files.length > 0 && (
+                        <span className="data-mono fade-in" style={{ color: "var(--text-secondary)", fontSize: "0.85rem", marginLeft: '1rem' }}>
+                            {files.filter(f => !f.result).length > 0 ?
+                                `PENDING: ${files.filter(f => !f.result).length} / ${files.length}` :
+                                `SCANNED: ${files.length}`
+                            }
+                        </span>
+                    )}
                 </div>
 
-                {result && (
-                    <div className="slider-group">
-                        <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                            Confidence ({confThreshold.toFixed(2)}):
-                        </span>
-                        <input
-                            type="range"
-                            min="0" max="1" step="0.05"
-                            value={confThreshold}
-                            onChange={(e) => setConfThreshold(parseFloat(e.target.value))}
-                        />
-                    </div>
-                )}
+                <div className="slider-group" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <span className="data-mono" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                        CONFIDENCE {(confThreshold * 100).toFixed(0)}%
+                    </span>
+                    <input
+                        type="range"
+                        min="0" max="1" step="0.05"
+                        value={confThreshold}
+                        onChange={(e) => setConfThreshold(parseFloat(e.target.value))}
+                        style={{ width: '120px' }}
+                    />
+                </div>
             </div>
 
-            <div className="detection-layout">
-                <div className="glass-panel" style={{ padding: '0.5rem', position: 'relative' }}>
-                    {loading && (
-                        <div className="loading-overlay">
-                            <div className="spinner"></div>
-                            <p style={{ color: 'var(--accent-blue)', fontWeight: 600 }}>Running ML Model Inference...</p>
-                        </div>
-                    )}
+            {/* Main Split Layout */}
+            <div className="stagger-4 fade-in-up" style={{ display: 'flex', gap: '3rem', flex: 1, minHeight: 0 }}>
 
-                    <div className="canvas-container">
-                        {!result && !loading && (
-                            <div className="upload-placeholder">
-                                <AlertOctagon size={64} />
-                                <h3>Upload an image to detect defects</h3>
+                {/* Image Viewer Area */}
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2rem', minWidth: 0 }}>
+                    {/* Main Viewer - Frame */}
+                    <div style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+
+                        {currentLoading && (
+                            <div className="loading-overlay" style={{ background: 'rgba(245,240,232,0.85)', zIndex: 20 }}>
+                                <div className="data-mono" style={{ color: 'var(--ink)', fontSize: '1rem', letterSpacing: '0.1em' }}>ANALYZING CANVAS...</div>
                             </div>
                         )}
-                        {result && (
-                            <canvas
-                                ref={canvasRef}
-                                onMouseMove={handleCanvasMouseMove}
-                                onMouseLeave={handleCanvasMouseLeave}
-                            />
+
+                        <div style={{ flex: 1, width: '100%', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {!currentView && (
+                                <div className="fade-in" style={{ height: '400px', width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '1px dashed var(--sand)', background: 'var(--bg-base)' }}>
+                                    <h3 style={{ fontWeight: 400, color: 'var(--text-muted)', fontFamily: 'var(--font-serif)', fontStyle: 'italic', margin: 0, fontSize: '1.5rem' }}>Select media to begin</h3>
+                                </div>
+                            )}
+
+                            {currentView && !currentResult && !currentLoading && (
+                                <img src={currentView.previewUrl} className="fade-in" alt="Preview" style={{ maxWidth: '100%', maxHeight: '65vh', objectFit: 'contain' }} />
+                            )}
+
+                            {currentResult && (
+                                <div style={{ position: 'relative' }}>
+                                    <canvas
+                                        className="fade-in"
+                                        ref={canvasRef}
+                                        onMouseMove={handleCanvasMouseMove}
+                                        onMouseLeave={() => setHoveredDefectIdx(null)}
+                                        style={{
+                                            cursor: 'crosshair', maxWidth: '100%', maxHeight: '65vh', objectFit: 'contain',
+                                            opacity: hoveredDefectIdx !== null ? 0.9 : 1, transition: 'opacity 0.3s ease'
+                                        }}
+                                    />
+                                    {/* Scanning Beam Overlay while loading - reusing currentLoading logic just for scanning visual */}
+                                    {currentLoading && <div className="scanning-laser"></div>}
+                                </div>
+                            )}
+                        </div>
+
+                        {currentResult && (
+                            <div className="fade-in" style={{ width: '100%', display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--sand)', paddingTop: '1rem', marginTop: '1rem' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                                    <span style={{ fontSize: '1.2rem', fontFamily: 'var(--font-serif)', fontWeight: 600 }}>{currentResult.filename}</span>
+                                    <span className="data-mono" style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+                                        {currentResult.width} x {currentResult.height} PX
+                                    </span>
+                                </div>
+                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                    <button className="btn-secondary clickable" onClick={exportCSV} style={{ padding: '0.3rem 0.8rem', fontSize: '0.75rem' }}>Export Data</button>
+                                </div>
+                            </div>
                         )}
                     </div>
 
-                    {result && (
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem', padding: '0 1rem 1rem 0' }}>
-                            <button className="btn-secondary" onClick={exportCSV}><Download size={16} /> CSV</button>
-                            <button className="btn-secondary" onClick={exportPNG}><Download size={16} /> Canvas Image</button>
+                    {/* Bottom Contact Sheet / Film Strip */}
+                    {files.length > 0 && (
+                        <div className="fade-in-up" style={{ padding: '0.5rem 0', display: 'flex', gap: '1rem', overflowX: 'auto', flexShrink: 0 }}>
+                            {files.map((item, idx) => (
+                                <div
+                                    key={idx}
+                                    onClick={() => setSelectedIdx(idx)}
+                                    style={{
+                                        position: 'relative', width: '60px', height: '60px', borderRadius: '8px', overflow: 'hidden', cursor: 'pointer', flexShrink: 0,
+                                        boxShadow: selectedIdx === idx ? '0 8px 20px rgba(0,0,0,0.1)' : '0 2px 8px rgba(0,0,0,0.03)',
+                                        border: `2px solid ${selectedIdx === idx ? 'var(--accent-primary)' : 'transparent'}`,
+                                        transform: selectedIdx === idx ? 'translateY(-2px)' : 'translateY(0)',
+                                        opacity: item.loading ? 0.3 : 1,
+                                        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', background: '#fff'
+                                    }}
+                                >
+                                    <img src={item.result ? item.result.preview_base64 : item.previewUrl} alt="Contact sheet thumb" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    {item.result && (
+                                        <div style={{ position: 'absolute', bottom: 4, right: 4, background: item.result.instances.length > 0 ? 'var(--critical)' : 'var(--success)', width: '8px', height: '8px', borderRadius: '50%', border: '1px solid #fff' }}></div>
+                                    )}
+                                    <button
+                                        onClick={(e) => removeFile(idx, e)}
+                                        style={{ position: 'absolute', top: 2, left: 2, background: 'rgba(255,255,255,0.8)', border: 'none', color: '#000', cursor: 'pointer', padding: '2px', borderRadius: '50%', opacity: selectedIdx === idx ? 1 : 0 }}
+                                    >
+                                        <X size={10} />
+                                    </button>
+                                </div>
+                            ))}
                         </div>
                     )}
                 </div>
 
-                <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', maxHeight: '80vh' }}>
-                    <h3 className="title">Detected Issues ({filteredInstances.length})</h3>
+                {/* Fixed Right Slide-in Panel for Defects - Condition Report */}
+                <div style={{
+                    width: rightPanelOpen && currentResult ? '400px' : '0px',
+                    opacity: rightPanelOpen && currentResult ? 1 : 0,
+                    overflow: 'hidden', transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+                    display: 'flex', flexDirection: 'column', borderLeft: rightPanelOpen ? '1px solid var(--sand)' : 'none',
+                    paddingLeft: rightPanelOpen ? '2rem' : '0'
+                }}>
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid var(--sand)', whiteSpace: 'nowrap' }}>
+                            <h3 style={{ margin: 0, fontSize: '1.5rem', fontFamily: 'var(--font-serif)', fontWeight: 400 }}>Condition Report</h3>
+                            <span className="data-mono" style={{ color: 'var(--text-muted)' }}>
+                                {currentFilteredInstances.length} ISSUES
+                            </span>
+                        </div>
 
-                    <div className="defect-list">
-                        {filteredInstances.map((inst, i) => {
-                            const labelName = LABEL_MAP[inst.label] || "Defect";
-                            const area = Math.abs((inst.box[2] - inst.box[0]) * (inst.box[3] - inst.box[1]));
+                        <div className="defect-list" style={{ flex: 1, overflowY: 'auto' }}>
+                            {currentFilteredInstances.map((inst, i) => {
+                                const labelName = LABEL_MAP[inst.label] || "Defect";
+                                const color = SEVERITY_COLORS[labelName] || 'var(--ink)';
+                                const confidence = inst.score * 100;
 
-                            return (
-                                <div
-                                    key={i}
-                                    className={`defect-item ${hoveredIndex === i ? 'active' : ''}`}
-                                    onMouseEnter={() => setHoveredIndex(i)}
-                                    onMouseLeave={() => setHoveredIndex(null)}
-                                >
-                                    <div className="defect-item-header">
-                                        <span className="defect-type">{labelName}</span>
-                                        <span className="defect-score">{(inst.score * 100).toFixed(1)}%</span>
+                                return (
+                                    <div
+                                        key={i}
+                                        className="clickable"
+                                        style={{
+                                            background: hoveredDefectIdx === i ? 'var(--bg-parchment)' : 'var(--bg-base)',
+                                            borderLeft: `3px solid ${color}`, border: '1px solid var(--sand)',
+                                            borderLeftWidth: '3px', borderLeftColor: color,
+                                            padding: '1rem', cursor: 'pointer', transition: 'all 0.2s ease',
+                                            marginBottom: '1rem',
+                                            animation: `fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${i * 60}ms backwards`
+                                        }}
+                                        onMouseEnter={() => setHoveredDefectIdx(i)}
+                                        onMouseLeave={() => setHoveredDefectIdx(null)}
+                                    >
+                                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+                                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.8rem', color: 'var(--ink)', fontWeight: 300, lineHeight: 1 }}>{(i + 1).toString().padStart(2, '0')}</span>
+                                            <div style={{ flex: 1 }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.3rem' }}>
+                                                    <span style={{ fontWeight: 400, fontFamily: 'var(--font-serif)', color: 'var(--ink)', fontSize: '1.2rem' }}>{labelName}</span>
+                                                    <span className="data-mono" style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{confidence.toFixed(0)}%</span>
+                                                </div>
+
+                                                {/* Severity Line Bar */}
+                                                <div style={{ width: '100%', height: '2px', background: 'var(--sand)', margin: '0.6rem 0' }}>
+                                                    <div style={{ width: `${confidence}%`, height: '100%', background: color, transition: 'width 1s cubic-bezier(0.16, 1, 0.3, 1)' }}></div>
+                                                </div>
+
+                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5, marginTop: '0.5rem' }}>
+                                                    {CURES[inst.label] || CURES[labelName]}
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <span className="defect-area">Area: {Math.round(area).toLocaleString()} px²</span>
-                                    <div className="defect-cure">
-                                        <strong>Suggested Action:</strong> {CURES[inst.label] || CURES[labelName]}
-                                    </div>
+                                );
+                            })}
+
+                            {currentResult && currentFilteredInstances.length === 0 && (
+                                <div className="empty-state" style={{ textAlign: 'center', padding: '3rem 0', animation: 'fadeIn 0.5s ease', border: '1px dashed var(--sand)' }}>
+                                    <p style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: '1.2rem' }}>Item is in pristine condition.</p>
                                 </div>
-                            );
-                        })}
+                            )}
+                        </div>
 
-                        {result && filteredInstances.length === 0 && (
-                            <div className="empty-state" style={{ padding: '2rem 1rem' }}>
-                                <Activity size={32} style={{ margin: '0 auto 1rem', color: '#8ce196' }} />
-                                <p>No defects found above {confThreshold * 100}%. Component looks clean.</p>
+                        {/* Overall Score Block */}
+                        {currentResult && currentFilteredInstances.length > 0 && (
+                            <div className="fade-up delay-600" style={{ marginTop: '2rem', padding: '1.5rem', background: 'var(--ink)', color: 'var(--bg-base)', border: '1px solid var(--sand)' }}>
+                                <div className="data-mono" style={{ color: 'var(--sand)', marginBottom: '0.5rem' }}>OVERALL GRADE</div>
+                                <div style={{ display: 'flex', alignItems: 'baseline', gap: '1rem' }}>
+                                    <div style={{ fontSize: '3rem', fontFamily: 'var(--font-serif)', lineHeight: 1 }}>
+                                        {Math.max(1, (10 - (currentFilteredInstances.length * 0.8))).toFixed(1)} <span style={{ fontSize: '1.2rem', color: 'var(--sand)' }}>/ 10</span>
+                                    </div>
+                                    <div className="data-mono" style={{ color: 'var(--warning)', letterSpacing: '0.1em' }}>FAIR</div>
+                                </div>
+                            </div>
+                        )}
+                        {currentResult && currentFilteredInstances.length === 0 && (
+                            <div className="fade-up delay-600" style={{ marginTop: '2rem', padding: '1.5rem', background: 'var(--ink)', color: 'var(--bg-base)', border: '1px solid var(--sand)' }}>
+                                <div className="data-mono" style={{ color: 'var(--sand)', marginBottom: '0.5rem' }}>OVERALL GRADE</div>
+                                <div style={{ display: 'flex', alignItems: 'baseline', gap: '1rem' }}>
+                                    <div style={{ fontSize: '3rem', fontFamily: 'var(--font-serif)', lineHeight: 1 }}>
+                                        10.0 <span style={{ fontSize: '1.2rem', color: 'var(--sand)' }}>/ 10</span>
+                                    </div>
+                                    <div className="data-mono" style={{ color: 'var(--success)', letterSpacing: '0.1em' }}>PRISTINE</div>
+                                </div>
                             </div>
                         )}
                     </div>
