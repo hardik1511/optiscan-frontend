@@ -38,6 +38,7 @@ export default function DetectionUI() {
 
     // Panel interactions
     const [hoveredDefectIdx, setHoveredDefectIdx] = useState(null);
+    const [zoomedDefectIdx, setZoomedDefectIdx] = useState(null);
     const [rightPanelOpen, setRightPanelOpen] = useState(false);
 
     const canvasRef = useRef(null);
@@ -229,6 +230,35 @@ export default function DetectionUI() {
         }
     }, [confThreshold, hoveredDefectIdx, currentResult, selectedIdx]);
 
+    useEffect(() => {
+        setZoomedDefectIdx(null);
+    }, [selectedIdx]);
+
+    let canvasTransform = 'scale(1)';
+    let canvasTransformOrigin = '50% 50%';
+
+    if (currentResult && zoomedDefectIdx !== null && currentFilteredInstances[zoomedDefectIdx]) {
+        const inst = currentFilteredInstances[zoomedDefectIdx];
+        const [x1, y1, x2, y2] = inst.box;
+        const cx = (x1 + x2) / 2;
+        const cy = (y1 + y2) / 2;
+        
+        const pctX = (cx / currentResult.width) * 100;
+        const pctY = (cy / currentResult.height) * 100;
+        
+        canvasTransformOrigin = `${pctX}% ${pctY}%`;
+        
+        const boxWidth = x2 - x1;
+        const boxHeight = y2 - y1;
+        const maxBoxDim = Math.max(boxWidth, boxHeight);
+        
+        // Scale dynamically to fit the defect nicely
+        let scale = Math.max(currentResult.width, currentResult.height) / (maxBoxDim * 2.5);
+        scale = Math.min(Math.max(scale, 1.8), 4.5); // Clamp scale
+
+        canvasTransform = `scale(${scale})`;
+    }
+
     const handleCanvasMouseMove = (e) => {
         if (!currentResult || !canvasRef.current) return;
 
@@ -374,15 +404,20 @@ export default function DetectionUI() {
                             )}
 
                             {currentResult && (
-                                <div style={{ position: 'relative' }}>
+                                <div style={{ position: 'relative', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderRadius: '8px' }}>
                                     <canvas
                                         className="fade-in"
                                         ref={canvasRef}
                                         onMouseMove={handleCanvasMouseMove}
                                         onMouseLeave={() => setHoveredDefectIdx(null)}
+                                        onClick={() => zoomedDefectIdx !== null ? setZoomedDefectIdx(null) : null}
                                         style={{
-                                            cursor: 'crosshair', maxWidth: '100%', maxHeight: '65vh', objectFit: 'contain',
-                                            opacity: hoveredDefectIdx !== null ? 0.9 : 1, transition: 'opacity 0.3s ease'
+                                            cursor: zoomedDefectIdx !== null ? 'zoom-out' : 'crosshair', 
+                                            maxWidth: '100%', maxHeight: '65vh', objectFit: 'contain',
+                                            opacity: hoveredDefectIdx !== null && zoomedDefectIdx === null ? 0.9 : 1, 
+                                            transition: 'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease',
+                                            transform: canvasTransform,
+                                            transformOrigin: canvasTransformOrigin
                                         }}
                                     />
                                     {/* Scanning Beam Overlay while loading - reusing currentLoading logic just for scanning visual */}
@@ -461,16 +496,17 @@ export default function DetectionUI() {
                                 const confidence = inst.score * 100;
 
                                 return (
-                                    <div
+                                     <div
                                         key={i}
                                         className="clickable"
+                                        onClick={() => setZoomedDefectIdx(zoomedDefectIdx === i ? null : i)}
                                         style={{
-                                            background: hoveredDefectIdx === i ? 'var(--bg-parchment)' : 'var(--bg-base)',
+                                            background: hoveredDefectIdx === i || zoomedDefectIdx === i ? 'var(--bg-parchment)' : 'var(--bg-base)',
                                             borderLeft: `3px solid ${color}`, border: '1px solid var(--sand)',
-                                            borderLeftWidth: '3px', borderLeftColor: color,
-                                            padding: '1rem', cursor: 'pointer', transition: 'all 0.2s ease',
+                                            padding: '1rem', cursor: zoomedDefectIdx === i ? 'zoom-out' : 'zoom-in', transition: 'all 0.2s ease',
                                             marginBottom: '1rem',
-                                            animation: `fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${i * 60}ms backwards`
+                                            animation: `fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${i * 60}ms backwards`,
+                                            boxShadow: zoomedDefectIdx === i ? '0 4px 12px rgba(0,0,0,0.08)' : 'none'
                                         }}
                                         onMouseEnter={() => setHoveredDefectIdx(i)}
                                         onMouseLeave={() => setHoveredDefectIdx(null)}
