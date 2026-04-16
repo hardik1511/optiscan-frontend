@@ -339,7 +339,7 @@ export default function DetectionUI() {
                 </div>
 
                 <div className="slider-group" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <span className="data-mono" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                    <span className="data-mono" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
                         CONFIDENCE {(confThreshold * 100).toFixed(0)}%
                     </span>
                     <input

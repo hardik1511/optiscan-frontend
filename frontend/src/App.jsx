@@ -43,19 +43,19 @@ function App() {
     }, []);
 
     const NavLink = ({ label, href = "#" }) => (
-        <a href={href} 
-           onClick={e => {
-               if (href.startsWith('#') && href !== '#') {
-                   e.preventDefault();
-                   document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
-               }
-           }} 
-           className="clickable" style={{
-            textDecoration: 'none', color: 'var(--ink)',
-            fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
-            textTransform: 'uppercase', letterSpacing: '0.1em',
-            transition: 'color 0.2s ease', opacity: 0.8
-        }} onMouseOver={e => e.target.style.opacity = 1} onMouseOut={e => e.target.style.opacity = 0.8}>
+        <a href={href}
+            onClick={e => {
+                if (href.startsWith('#') && href !== '#') {
+                    e.preventDefault();
+                    document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
+                }
+            }}
+            className="clickable" style={{
+                textDecoration: 'none', color: 'var(--ink)',
+                fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+                textTransform: 'uppercase', letterSpacing: '0.1em',
+                transition: 'color 0.2s ease', opacity: 0.8
+            }} onMouseOver={e => e.target.style.opacity = 1} onMouseOut={e => e.target.style.opacity = 0.8}>
             {label}
         </a>
     );
@@ -189,23 +189,23 @@ function App() {
                 <h2 className="section-type" style={{ marginBottom: '4rem' }}>
                     System & Deep Learning Architecture.
                 </h2>
-                
+
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4rem' }}>
                     {/* Slide 1 Layout - 3 Tiers */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'stretch', gap: '1rem' }}>
-                        
+
                         {/* Presentation Tier */}
                         <div style={{ flex: 1, border: '1px solid var(--ink)', borderRadius: '8px', padding: '2rem 1rem', position: 'relative', background: 'var(--bg-base)', display: 'flex', flexDirection: 'column' }}>
                             <div style={{ position: 'absolute', top: '-10px', left: '20px', background: 'var(--bg-base)', padding: '0 10px', border: '1px solid var(--ink)', fontSize: '0.7rem', color: 'var(--ink)', whiteSpace: 'nowrap' }}>PRESENTATION TIER</div>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '100%', marginTop: '1rem' }}>
                                 <div style={{ textAlign: 'center', flex: 1 }}>
                                     <User size={32} strokeWidth={1} style={{ marginBottom: '0.5rem' }} />
-                                    <div style={{ fontSize: '0.7rem' }}>USER /<br/>CURATOR</div>
+                                    <div style={{ fontSize: '0.7rem' }}>USER /<br />CURATOR</div>
                                 </div>
                                 <AnimatedArrow width="80px" delay={0.5} label="Upload Image" direction="right" />
                                 <div style={{ textAlign: 'center', flex: 1 }}>
                                     <Code size={32} strokeWidth={1} style={{ marginBottom: '0.5rem' }} />
-                                    <div style={{ fontSize: '0.7rem' }}>REACT.JS<br/>FRONTEND</div>
+                                    <div style={{ fontSize: '0.7rem' }}>REACT.JS<br />FRONTEND</div>
                                 </div>
                             </div>
                         </div>
@@ -223,14 +223,14 @@ function App() {
                             <div style={{ background: 'var(--ink)', color: 'var(--bg-base)', borderRadius: '50%', width: '60px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
                                 <Zap size={32} strokeWidth={1.5} />
                             </div>
-                            <div style={{ fontSize: '0.8rem', textAlign: 'center' }}>FASTAPI<br/>BACKEND</div>
+                            <div style={{ fontSize: '0.8rem', textAlign: 'center' }}>FASTAPI<br />BACKEND</div>
                         </div>
 
                         {/* Arrows 2 to 3 */}
                         <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', width: '100px' }}>
-                             <AnimatedArrow width="100%" delay={2.0} direction="right" />
-                             <div style={{ height: '30px' }} />
-                             <AnimatedArrow width="100%" delay={3.0} direction="left" />
+                            <AnimatedArrow width="100%" delay={2.0} direction="right" />
+                            <div style={{ height: '30px' }} />
+                            <AnimatedArrow width="100%" delay={3.0} direction="left" />
                         </div>
 
                         {/* Model Tier */}
@@ -239,90 +239,90 @@ function App() {
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '100%', marginTop: '1rem' }}>
                                 <div style={{ textAlign: 'center', flex: 1 }}>
                                     <Cpu size={32} strokeWidth={1} style={{ marginBottom: '0.5rem' }} />
-                                    <div style={{ fontSize: '0.7rem' }}>MASK R-CNN<br/>MODEL</div>
+                                    <div style={{ fontSize: '0.7rem' }}>MASK R-CNN<br />MODEL</div>
                                 </div>
                                 <AnimatedArrow width="50px" delay={2.5} direction="right" />
                                 <div style={{ textAlign: 'center', flex: 1 }}>
                                     <Database size={32} strokeWidth={1} style={{ marginBottom: '0.5rem' }} />
-                                    <div style={{ fontSize: '0.7rem' }}>MODEL<br/>WEIGHTS</div>
+                                    <div style={{ fontSize: '0.7rem' }}>MODEL<br />WEIGHTS</div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     {/* Slide 2 Layout */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', overflowX: 'auto', paddingBottom: '1rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', overflowX: 'auto', paddingTop: '1rem', paddingBottom: '1rem' }}>
                         {/* Stage 1 */}
                         <div style={{ border: '1px solid var(--accent-teal)', borderRadius: '8px', padding: '2rem', position: 'relative', background: 'var(--bg-base)' }}>
-                            <div style={{ position: 'absolute', top: '-10px', left: '20px', background: 'var(--bg-base)', padding: '0 10px', border: '1px solid var(--accent-teal)', fontSize: '0.7rem', color: 'var(--accent-teal)' }}>STAGE 1: FEATURE EXTRACTION AND REGION PROPOSALS</div>
-                            
+                            <div style={{ position: 'absolute', top: '-1px', left: '20px', background: 'var(--bg-base)', padding: '0 10px', border: '1px solid var(--accent-teal)', fontSize: '0.7rem', color: 'var(--accent-teal)' }}>STAGE 1: FEATURE EXTRACTION AND REGION PROPOSALS</div>
+
                             <div style={{ display: 'flex', alignItems: 'center', marginTop: '1rem' }}>
                                 <div style={{ background: '#b4dced', border: '1px solid var(--ink)', padding: '1rem', borderRadius: '4px', textAlign: 'center', minWidth: '120px' }}>
-                                    <ImageIcon size={20} style={{ marginBottom: '0.5rem' }}/>
+                                    <ImageIcon size={20} style={{ marginBottom: '0.5rem' }} />
                                     <div style={{ fontSize: '0.8rem' }}>Input Image</div>
                                 </div>
                                 <AnimatedArrow width="100px" delay={4.0} label="Raw pixels" />
-                                
+
                                 <div style={{ background: '#0a7a7a', color: 'white', border: '1px solid var(--ink)', padding: '1rem', borderRadius: '4px', textAlign: 'center', minWidth: '120px' }}>
-                                    <Layers size={20} style={{ marginBottom: '0.5rem' }}/>
-                                    <div style={{ fontSize: '0.8rem' }}>ResNet<br/>Backbone</div>
+                                    <Layers size={20} style={{ marginBottom: '0.5rem' }} />
+                                    <div style={{ fontSize: '0.8rem' }}>ResNet<br />Backbone</div>
                                 </div>
                                 <AnimatedArrow width="120px" delay={4.5} label="Multi scale feature maps" />
-                                
+
                                 <div style={{ background: '#0a7a7a', color: 'white', border: '1px solid var(--ink)', padding: '1rem', borderRadius: '4px', textAlign: 'center', minWidth: '130px' }}>
-                                    <Scan size={20} style={{ marginBottom: '0.5rem' }}/>
-                                    <div style={{ fontSize: '0.8rem' }}>Feature Pyramid<br/>Network</div>
+                                    <Scan size={20} style={{ marginBottom: '0.5rem' }} />
+                                    <div style={{ fontSize: '0.8rem' }}>Feature Pyramid<br />Network</div>
                                 </div>
                                 <AnimatedArrow width="120px" delay={5.0} label="Fuses scales P2 to P6" />
-                                
+
                                 <div style={{ background: '#c1d4ff', border: '1px solid var(--ink)', padding: '1rem', borderRadius: '4px', textAlign: 'center', minWidth: '130px' }}>
-                                    <Box size={20} style={{ marginBottom: '0.5rem' }}/>
-                                    <div style={{ fontSize: '0.8rem' }}>Region Proposal<br/>Network</div>
+                                    <Box size={20} style={{ marginBottom: '0.5rem' }} />
+                                    <div style={{ fontSize: '0.8rem' }}>Region Proposal<br />Network</div>
                                 </div>
                             </div>
                         </div>
 
                         {/* Arrow between stages */}
                         <div style={{ paddingLeft: '4rem', display: 'flex', alignItems: 'center' }}>
-                             <div style={{ borderLeft: '2px solid var(--ink)', borderBottom: '2px solid var(--ink)', width: '20px', height: '30px', transform: 'translateY(-15px) scaleX(0)', transformOrigin: 'top left', animation: 'growRight 0.5s forwards 5.5s' }} />
-                             <span style={{ fontSize: '0.7rem', margin: '0 1rem', whiteSpace: 'nowrap', opacity: 0, animation: `fadeInArrow 0.2s forwards 5.8s` }}>Approximately<br/>2000 region proposals</span>
-                             <AnimatedArrow direction="right" width="60px" delay={6.0} />
+                            <div style={{ borderLeft: '2px solid var(--ink)', borderBottom: '2px solid var(--ink)', width: '20px', height: '30px', transform: 'translateY(-15px) scaleX(0)', transformOrigin: 'top left', animation: 'growRight 0.5s forwards 5.5s' }} />
+                            <span style={{ fontSize: '0.7rem', margin: '0 1rem', whiteSpace: 'nowrap', opacity: 0, animation: `fadeInArrow 0.2s forwards 5.8s` }}>Approximately<br />2000 region proposals</span>
+                            <AnimatedArrow direction="right" width="60px" delay={6.0} />
                         </div>
 
                         {/* Stage 2 */}
                         <div style={{ border: '1px solid #4a7cf6', borderRadius: '8px', padding: '2rem', position: 'relative', background: 'var(--bg-base)', display: 'flex', alignItems: 'center' }}>
-                            <div style={{ position: 'absolute', top: '-10px', left: '20px', background: 'var(--bg-base)', padding: '0 10px', border: '1px solid #4a7cf6', fontSize: '0.7rem', color: '#4a7cf6' }}>STAGE 2: CLASSIFICATION; BOX REGRESSION AND MASK PREDICTION</div>
-                            
+                            <div style={{ position: 'absolute', top: '-1px', left: '20px', background: 'var(--bg-base)', padding: '0 10px', border: '1px solid #4a7cf6', fontSize: '0.7rem', color: '#4a7cf6' }}>STAGE 2: CLASSIFICATION; BOX REGRESSION AND MASK PREDICTION</div>
+
                             <div style={{ background: '#c1d4ff', border: '1px solid var(--ink)', padding: '1rem', borderRadius: '4px', textAlign: 'center', minWidth: '120px', marginTop: '1rem', zIndex: 2 }}>
-                                <AlignCenter size={20} style={{ marginBottom: '0.5rem' }}/>
+                                <AlignCenter size={20} style={{ marginBottom: '0.5rem' }} />
                                 <div style={{ fontSize: '0.8rem' }}>RoIAlign</div>
                             </div>
-                            
+
                             <div style={{ display: 'flex', flexDirection: 'column', flex: 1, marginTop: '1rem' }}>
-                                 {/* Top Path */}
-                                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: '2rem' }}>
-                                      <AnimatedArrow width="100px" delay={6.5} label="Bilinear init." />
-                                      <div style={{ background: '#b2f2b2', border: '1px solid var(--ink)', padding: '1rem', borderRadius: '4px', textAlign: 'center', minWidth: '120px' }}>
-                                          <Box size={20} style={{ marginBottom: '0.5rem' }}/>
-                                          <div style={{ fontSize: '0.8rem' }}>Detection Head</div>
-                                      </div>
-                                      <AnimatedArrow width="150px" delay={7.0} label="Class, BBox, Score" />
-                                      <div style={{ background: '#b2f2b2', border: '1px solid var(--ink)', padding: '1rem', borderRadius: '30px', textAlign: 'center', minWidth: '160px' }}>
-                                          <div style={{ fontSize: '0.8rem' }}>Bounding Box,<br/>Label and Score</div>
-                                      </div>
-                                 </div>
-                                 {/* Bottom Path */}
-                                 <div style={{ display: 'flex', alignItems: 'center', marginLeft: '50px' }}>
-                                      <AnimatedArrow width="180px" delay={6.8} label="Bilinear interpolation" />
-                                      <div style={{ background: '#f6d5b0', border: '1px solid var(--ink)', padding: '1rem', borderRadius: '4px', textAlign: 'center', minWidth: '120px' }}>
-                                          <Disc size={20} style={{ marginBottom: '0.5rem' }}/>
-                                          <div style={{ fontSize: '0.8rem' }}>Mask Head</div>
-                                      </div>
-                                      <AnimatedArrow width="100px" delay={7.3} label="28x28 mask" />
-                                      <div style={{ background: '#f6d5b0', border: '1px solid var(--ink)', padding: '1rem', borderRadius: '30px', textAlign: 'center', minWidth: '160px' }}>
-                                          <div style={{ fontSize: '0.8rem' }}>Pixel Level<br/>Binary Mask</div>
-                                      </div>
-                                 </div>
+                                {/* Top Path */}
+                                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '2rem' }}>
+                                    <AnimatedArrow width="100px" delay={6.5} label="Bilinear init." />
+                                    <div style={{ background: '#b2f2b2', border: '1px solid var(--ink)', padding: '1rem', borderRadius: '4px', textAlign: 'center', minWidth: '120px' }}>
+                                        <Box size={20} style={{ marginBottom: '0.5rem' }} />
+                                        <div style={{ fontSize: '0.8rem' }}>Detection Head</div>
+                                    </div>
+                                    <AnimatedArrow width="150px" delay={7.0} label="Class, BBox, Score" />
+                                    <div style={{ background: '#b2f2b2', border: '1px solid var(--ink)', padding: '1rem', borderRadius: '30px', textAlign: 'center', minWidth: '160px' }}>
+                                        <div style={{ fontSize: '0.8rem' }}>Bounding Box,<br />Label and Score</div>
+                                    </div>
+                                </div>
+                                {/* Bottom Path */}
+                                <div style={{ display: 'flex', alignItems: 'center', marginLeft: '50px' }}>
+                                    <AnimatedArrow width="180px" delay={6.8} label="Bilinear interpolation" />
+                                    <div style={{ background: '#f6d5b0', border: '1px solid var(--ink)', padding: '1rem', borderRadius: '4px', textAlign: 'center', minWidth: '120px' }}>
+                                        <Disc size={20} style={{ marginBottom: '0.5rem' }} />
+                                        <div style={{ fontSize: '0.8rem' }}>Mask Head</div>
+                                    </div>
+                                    <AnimatedArrow width="100px" delay={7.3} label="28x28 mask" />
+                                    <div style={{ background: '#f6d5b0', border: '1px solid var(--ink)', padding: '1rem', borderRadius: '30px', textAlign: 'center', minWidth: '160px' }}>
+                                        <div style={{ fontSize: '0.8rem' }}>Pixel Level<br />Binary Mask</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -349,16 +349,16 @@ function App() {
                 <div style={{ position: 'relative', padding: '2rem 0', marginBottom: '6rem' }}>
                     <div style={{ display: 'flex', gap: '2rem', whiteSpace: 'nowrap', animation: 'marqueeImages 40s linear infinite' }}>
                         {[
-                            "100549316.jpg", "101455688.jpg", "103158569.jpg", "104394531.jpg", 
-                            "105108642.jpg", "105575561.jpg", "105630493.jpg", "106509399.jpg", 
+                            "100549316.jpg", "101455688.jpg", "103158569.jpg", "104394531.jpg",
+                            "105108642.jpg", "105575561.jpg", "105630493.jpg", "106509399.jpg",
                             "106756591.jpg", "108843994.jpg", "109503173.jpg", "110025024.jpg",
                             "100549316.jpg", "101455688.jpg", "103158569.jpg", "104394531.jpg"
                         ].map((imgName, idx) => (
-                            <div key={idx} style={{ 
-                                display: 'inline-block', width: '350px', height: '240px', borderRadius: '4px', overflow: 'hidden', 
-                                border: '1px solid rgba(245, 240, 232, 0.2)', position: 'relative', flexShrink: 0 
+                            <div key={idx} style={{
+                                display: 'inline-block', width: '350px', height: '240px', borderRadius: '4px', overflow: 'hidden',
+                                border: '1px solid rgba(245, 240, 232, 0.2)', position: 'relative', flexShrink: 0
                             }}>
-                                <img src={`/gallery/${imgName}`} alt={`Gallery Sample ${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8, transition: 'all 0.3s ease', filter: 'grayscale(0.3)' }} onMouseOver={e => {e.currentTarget.style.opacity = 1; e.currentTarget.style.filter = 'grayscale(0)'; e.currentTarget.style.transform = 'scale(1.05)'}} onMouseOut={e => {e.currentTarget.style.opacity = 0.8; e.currentTarget.style.filter = 'grayscale(0.3)'; e.currentTarget.style.transform = 'scale(1)'}} />
+                                <img src={`/gallery/${imgName}`} alt={`Gallery Sample ${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8, transition: 'all 0.3s ease', filter: 'grayscale(0.3)' }} onMouseOver={e => { e.currentTarget.style.opacity = 1; e.currentTarget.style.filter = 'grayscale(0)'; e.currentTarget.style.transform = 'scale(1.05)' }} onMouseOut={e => { e.currentTarget.style.opacity = 0.8; e.currentTarget.style.filter = 'grayscale(0.3)'; e.currentTarget.style.transform = 'scale(1)' }} />
                             </div>
                         ))}
                     </div>
@@ -370,7 +370,7 @@ function App() {
 
                 {/* Grid of Augmentations & Challenges */}
                 <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 4rem', display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '6rem' }}>
-                    
+
                     {/* Challenge Block */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                         <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '2rem' }}>The Challenge</h3>
@@ -393,10 +393,10 @@ function App() {
                                 { icon: <Sun size={24} color="var(--warning)" />, title: 'Brightness Jitter', desc: 'Variadic contrast mapping models drastically shifting gallery or factory natural lighting conditions.' },
                                 { icon: <Droplet size={24} color="#4a7cf6" />, title: 'Gaussian Blur', desc: 'σ=0.5–1.5 randomized sweeps ensure resilience against varying focal lengths and poor ambient optics.' },
                             ].map((aug, i) => (
-                                <div key={i} className="clickable" style={{ 
-                                    background: 'rgba(255,255,255,0.03)', padding: '2rem', borderRadius: '8px', 
-                                    border: '1px solid rgba(255,255,255,0.08)', transition: 'all 0.3s ease' 
-                                }} onMouseOver={e => {e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';}} onMouseOut={e => {e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';}}>
+                                <div key={i} className="clickable" style={{
+                                    background: 'rgba(255,255,255,0.03)', padding: '2rem', borderRadius: '8px',
+                                    border: '1px solid rgba(255,255,255,0.08)', transition: 'all 0.3s ease'
+                                }} onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'; }} onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}>
                                     <div style={{ marginBottom: '1.5rem', background: 'rgba(0,0,0,0.3)', width: '50px', height: '50px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                         {aug.icon}
                                     </div>
