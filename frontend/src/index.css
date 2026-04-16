@@ -665,3 +665,161 @@ h2.title {
     0% { opacity: 0; }
     100% { opacity: 1; }
 }
+
+/* ------------------------------------- */
+/* Mobile Responsiveness Overrides       */
+/* ------------------------------------- */
+@media (max-width: 1024px) {
+    #catalog > div:last-child {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    section, footer {
+        padding-left: 2rem !important;
+        padding-right: 2rem !important;
+    }
+    #dataset > div {
+        padding-left: 2rem !important;
+        padding-right: 2rem !important;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Typography adjustments */
+    h1.display-type, .display-type {
+        font-size: 2.8rem !important;
+    }
+    h2.section-type, .section-type {
+        font-size: 2rem !important;
+    }
+    
+    /* Navigation */
+    nav {
+        padding: 1rem !important;
+        flex-direction: column !important;
+        gap: 1rem !important;
+        position: relative !important;
+        background: var(--bg-elevated) !important;
+        backdrop-filter: blur(12px) !important;
+    }
+    nav > div {
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 1.5rem !important;
+    }
+    
+    /* Global Section Container Adjustments */
+    section {
+        padding-left: 1.5rem !important;
+        padding-right: 1.5rem !important;
+        padding-top: 4rem !important;
+        padding-bottom: 2rem !important;
+    }
+
+    /* Hero Section */
+    .app-container > section:first-of-type {
+        flex-direction: column !important;
+        padding-top: 2rem !important;
+        gap: 3rem !important;
+        height: auto !important;
+        min-height: auto !important;
+    }
+    .app-container > section:first-of-type > div {
+        padding-right: 0 !important;
+        width: 100% !important;
+    }
+    /* Fixed 600px scanner box -> responsive */
+    .app-container > section:first-of-type > div:last-child > div {
+        height: 500px !important;
+        width: 100% !important;
+    }
+
+    /* Global flex row -> column overrides for main blocks */
+    /* Architecture */
+    #architecture > div > div:first-child {
+        flex-direction: column !important;
+        gap: 2rem !important;
+    }
+    #architecture > div > div:first-child > div[style*="width: 120px"],
+    #architecture > div > div:first-child > div[style*="width: 100px"] {
+        width: 100% !important;
+        flex-direction: row !important;
+        height: 50px !important;
+        align-items: center !important;
+    }
+    
+    /* Dataset Section */
+    #dataset > div:first-child {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 1rem !important;
+    }
+    #dataset > div:first-child > div:last-child {
+        border-right: none !important;
+        border-left: 3px solid var(--accent-red) !important;
+        padding-right: 0 !important;
+        padding-left: 1.5rem !important;
+        text-align: left !important;
+    }
+    #dataset > div:last-child {
+        grid-template-columns: 1fr !important;
+        gap: 3rem !important;
+    }
+    #dataset > div:last-child > div:last-child > div {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Catalog */
+    #catalog > div:first-of-type {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 1rem !important;
+    }
+    #catalog > div:first-of-type > div {
+        text-align: left !important;
+    }
+
+    /* Footer */
+    footer {
+        padding: 4rem 1.5rem 2rem !important;
+    }
+    footer > div:first-of-type {
+        grid-template-columns: 1fr !important;
+        gap: 3rem !important;
+    }
+    footer > div:last-of-type {
+        flex-direction: column !important;
+        gap: 1.5rem !important;
+        text-align: center !important;
+    }
+
+    /* Detection UI Specifics */
+    .stagger-4[style*="display: flex"] {
+        flex-direction: column !important;
+        gap: 1.5rem !important;
+    }
+    
+    /* Ensure right panel expands fully on mobile when open instead of fixed 400px */
+    .stagger-4 > div:last-child {
+        width: 100% !important;
+        border-left: none !important;
+        padding-left: 0 !important;
+        border-top: 1px solid var(--sand) !important;
+        padding-top: 2rem !important;
+    }
+    /* Hide the top border if panel is closed (width: 0px or opacity: 0) */
+    .stagger-4 > div:last-child[style*="opacity: 0"] {
+        border-top: none !important;
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Extreme narrow mobile adjustments */
+    #catalog > div:last-child {
+        grid-template-columns: 1fr !important;
+    }
+    h1.display-type, .display-type {
+        font-size: 2.2rem !important;
+    }
+}
