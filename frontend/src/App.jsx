@@ -329,67 +329,81 @@ function App() {
                 </div>
             </section>
 
-            {/* Dataset Section */}
-            <section id="dataset" style={{ padding: '4rem 4rem 8rem', maxWidth: '1400px', margin: '0 auto' }}>
-                <div className="eyebrow" style={{ marginBottom: '2rem' }}>Dataset</div>
-                
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '4rem' }}>
-                    <h2 className="section-type">
-                        Custom Fine-Tuning Specimen Data.
-                    </h2>
-                    <div style={{ textAlign: 'right', borderLeft: '3px solid var(--accent-red)', paddingLeft: '1.5rem' }}>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', opacity: 0.6, marginBottom: '0.5rem' }}>Target Source Entity</div>
+            {/* Dataset Section (Redesigned) */}
+            <section id="dataset" style={{ padding: '8rem 0', background: 'var(--ink)', color: 'var(--bg-base)', position: 'relative', overflow: 'hidden' }}>
+                {/* Header Content */}
+                <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 4rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '4rem' }}>
+                    <div>
+                        <div className="eyebrow" style={{ marginBottom: '2rem', color: 'var(--sand)' }}>Dataset Engineering</div>
+                        <h2 className="section-type" style={{ color: 'var(--bg-base)', maxWidth: '600px' }}>
+                            Fine-Tuning Specimen Data.
+                        </h2>
+                    </div>
+                    <div style={{ textAlign: 'right', borderRight: '3px solid var(--accent-red)', paddingRight: '1.5rem' }}>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', opacity: 0.6, marginBottom: '0.5rem', color: 'var(--sand)' }}>Target Source Entity</div>
                         <div style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem' }}>The Heritage Museum Gallery</div>
                     </div>
                 </div>
-                
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'start' }}>
-                    {/* Left Column */}
-                    <div>
-                        <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.8rem', marginBottom: '2rem' }}>Dataset Composition & Challenges</h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
-                            <div>
-                                <img src="/dataset/1.jpg" style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '8px', marginBottom: '1rem', border: '1px solid var(--sand)' }} />
-                                <h4 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.2rem', marginBottom: '0.5rem' }}>Gallery Images</h4>
-                                <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Paintings with cracks, canvas tears, colour fading, surface stains (public domain/original photographs)</p>
+
+                {/* Marquee Image Gallery */}
+                <div style={{ position: 'relative', padding: '2rem 0', marginBottom: '6rem' }}>
+                    <div style={{ display: 'flex', gap: '2rem', whiteSpace: 'nowrap', animation: 'marqueeImages 40s linear infinite' }}>
+                        {[
+                            "100549316.jpg", "101455688.jpg", "103158569.jpg", "104394531.jpg", 
+                            "105108642.jpg", "105575561.jpg", "105630493.jpg", "106509399.jpg", 
+                            "106756591.jpg", "108843994.jpg", "109503173.jpg", "110025024.jpg",
+                            "100549316.jpg", "101455688.jpg", "103158569.jpg", "104394531.jpg"
+                        ].map((imgName, idx) => (
+                            <div key={idx} style={{ 
+                                display: 'inline-block', width: '350px', height: '240px', borderRadius: '4px', overflow: 'hidden', 
+                                border: '1px solid rgba(245, 240, 232, 0.2)', position: 'relative', flexShrink: 0 
+                            }}>
+                                <img src={`/gallery/${imgName}`} alt={`Gallery Sample ${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8, transition: 'all 0.3s ease', filter: 'grayscale(0.3)' }} onMouseOver={e => {e.currentTarget.style.opacity = 1; e.currentTarget.style.filter = 'grayscale(0)'; e.currentTarget.style.transform = 'scale(1.05)'}} onMouseOut={e => {e.currentTarget.style.opacity = 0.8; e.currentTarget.style.filter = 'grayscale(0.3)'; e.currentTarget.style.transform = 'scale(1)'}} />
                             </div>
-                            <div>
-                                <img src="/dataset/2.jpg" style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '8px', marginBottom: '1rem', border: '1px solid var(--sand)' }} />
-                                <h4 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.2rem', marginBottom: '0.5rem' }}>Industrial Samples</h4>
-                                <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Metal surfaces with scratches, dents; PCB-like surfaces with surface anomalies</p>
-                            </div>
-                        </div>
-                        <div style={{ background: '#e3dcfa', padding: '1.5rem', borderRadius: '8px', borderLeft: '4px solid #7c3aed', display: 'flex', gap: '1rem' }}>
-                            <Box color="#7c3aed" />
-                            <div>
-                                <span style={{ fontWeight: 'bold' }}>Challenge:</span> Ground-truth labelling is time-intensive; high-quality defect examples are scarce. Risk of overfitting without sufficient image variety.
-                            </div>
+                        ))}
+                    </div>
+                    <style dangerouslySetInnerHTML={{
+                        __html: `
+                        @keyframes marqueeImages { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+                    `}} />
+                </div>
+
+                {/* Grid of Augmentations & Challenges */}
+                <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 4rem', display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '6rem' }}>
+                    
+                    {/* Challenge Block */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                        <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '2rem' }}>The Challenge</h3>
+                        <p style={{ fontSize: '1rem', color: 'var(--sand)', lineHeight: 1.6, opacity: 0.8 }}>
+                            Ground-truth labelling is extensively time-intensive. High-quality defect examples in pristine heritage environments are notoriously scarce, presenting a severe risk of model overfitting without sufficient image variety.
+                        </p>
+                        <div style={{ padding: '2rem', background: 'rgba(255, 255, 255, 0.05)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '8px' }}>
+                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--accent-red)', marginBottom: '1rem' }}>RESOLUTION</div>
+                            <span style={{ fontSize: '1.1rem', color: 'var(--bg-base)', lineHeight: 1.5, display: 'block' }}>Augmented dataset synthesized to ~5× original size, significantly mitigating validation overfitting.</span>
                         </div>
                     </div>
-                    
-                    {/* Right Column */}
+
+                    {/* Interactive Augmentation Strategy Grid */}
                     <div>
-                        <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.8rem', marginBottom: '2rem' }}>Data Augmentation Strategy</h3>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                        <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '2rem', marginBottom: '2rem' }}>Augmentation Pipeline</h3>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                             {[
-                                { icon: <RotateCw size={20} />, title: 'Random Rotation', desc: '±15° to handle tilted cameras and mounting angles' },
-                                { icon: <FlipHorizontal size={20} />, title: 'Horizontal Flipping', desc: 'Doubles dataset, simulates mirrored defect orientations' },
-                                { icon: <Sun size={20} />, title: 'Brightness/Contrast Jitter', desc: 'Models varying gallery or factory lighting conditions' },
-                                { icon: <Droplet size={20} />, title: 'Gaussian Blur', desc: 'σ=0.5–1.5 simulates different camera quality and focal conditions' },
+                                { icon: <RotateCw size={24} color="var(--accent-teal)" />, title: 'Random Rotation', desc: '±15° adjustments directly mimic tilted cameras and arbitrary mounting angles found in physical spaces.' },
+                                { icon: <FlipHorizontal size={24} color="#7c3aed" />, title: 'Horizontal Flipping', desc: 'Symmetric dataset doubling to robustly simulate mirrored defect orientations geometry.' },
+                                { icon: <Sun size={24} color="var(--warning)" />, title: 'Brightness Jitter', desc: 'Variadic contrast mapping models drastically shifting gallery or factory natural lighting conditions.' },
+                                { icon: <Droplet size={24} color="#4a7cf6" />, title: 'Gaussian Blur', desc: 'σ=0.5–1.5 randomized sweeps ensure resilience against varying focal lengths and poor ambient optics.' },
                             ].map((aug, i) => (
-                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', background: 'var(--bg-parchment)', padding: '1.2rem 1.5rem', borderRadius: '8px' }}>
-                                    <div style={{ background: '#845ef7', color: 'white', padding: '0.75rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <div key={i} className="clickable" style={{ 
+                                    background: 'rgba(255,255,255,0.03)', padding: '2rem', borderRadius: '8px', 
+                                    border: '1px solid rgba(255,255,255,0.08)', transition: 'all 0.3s ease' 
+                                }} onMouseOver={e => {e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';}} onMouseOut={e => {e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';}}>
+                                    <div style={{ marginBottom: '1.5rem', background: 'rgba(0,0,0,0.3)', width: '50px', height: '50px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                         {aug.icon}
                                     </div>
-                                    <div>
-                                        <div style={{ fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '0.2rem' }}>{aug.title}</div>
-                                        <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{aug.desc}</div>
-                                    </div>
+                                    <div style={{ fontWeight: 400, fontFamily: 'var(--font-serif)', fontSize: '1.3rem', marginBottom: '0.8rem' }}>{aug.title}</div>
+                                    <div style={{ fontSize: '0.9rem', color: 'var(--sand)', opacity: 0.7, lineHeight: 1.5 }}>{aug.desc}</div>
                                 </div>
                             ))}
-                        </div>
-                        <div style={{ marginTop: '2rem', padding: '1rem', borderTop: '1px solid var(--sand)' }}>
-                            <span style={{ fontWeight: 'bold' }}>Result:</span> Augmented dataset ~5× original size; significantly reduced overfitting on validation set.
                         </div>
                     </div>
                 </div>
