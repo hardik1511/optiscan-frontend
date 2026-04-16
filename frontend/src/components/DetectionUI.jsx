@@ -69,6 +69,16 @@ export default function DetectionUI() {
         }
     };
 
+    const handleReset = () => {
+        setFiles([]);
+        setSelectedIdx(null);
+        setHoveredDefectIdx(null);
+        setRightPanelOpen(false);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    };
+
     const handlePredictBatch = async () => {
         if (files.length === 0) return;
         setLoadingAll(true);
@@ -327,6 +337,18 @@ export default function DetectionUI() {
                                 <><Search size={16} /> Analyze Batch</>
                         }
                     </button>
+
+                    {files.length > 0 && (
+                        <button
+                            className="btn-secondary clickable fade-in"
+                            onClick={handleReset}
+                            disabled={loadingAll}
+                            style={{ padding: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', borderColor: 'transparent', background: 'rgba(42, 31, 20, 0.05)' }}
+                            title="Reset Batch"
+                        >
+                            <RefreshCw size={16} />
+                        </button>
+                    )}
 
                     {files.length > 0 && (
                         <span className="data-mono fade-in" style={{ color: "var(--text-secondary)", fontSize: "0.85rem", marginLeft: '1rem' }}>

@@ -149,7 +149,7 @@ function App() {
                         background: 'var(--bg-parchment)', padding: '2rem',
                         border: '10px solid var(--umber)',
                         boxShadow: '15px 15px 0px rgba(107, 79, 58, 0.1), inset 0 0 100px rgba(0,0,0,0.03)',
-                        height: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        minHeight: '600px', height: 'auto', display: 'flex', alignItems: 'stretch', justifyContent: 'center',
                         position: 'relative', overflow: 'hidden'
                     }}>
                         {/* Faint Grid over parchment */}
