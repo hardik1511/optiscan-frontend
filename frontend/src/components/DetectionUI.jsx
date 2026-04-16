@@ -114,34 +114,8 @@ export default function DetectionUI() {
                     if (f.result === null) {
                         const data = resultsData[resultIdx++];
                         
-                        // PRESENTATION OVERRIDE
-                        const fname = f.file.name.toLowerCase();
-                        if (fname.includes('clean') || fname.includes('perfect') || fname.includes('pristine') || fname.includes('good') || fname.includes('no_defect')) {
-                            data.instances = [];
-                        } else if (fname.includes('crack') || fname.includes('scratch') || fname.includes('stain') || fname.includes('dent')) {
-                            // Smart Mock for specific defects to satisfy presentation requirements
-                            const mockInstances = [];
-                            // We construct a dynamic realistic box in the middle of the image
-                            const imgWidth = data.width || 600;
-                            const imgHeight = data.height || 400;
-                            const cx = imgWidth / 2;
-                            const cy = imgHeight / 2;
-                            
-                            if (fname.includes('crack')) {
-                                mockInstances.push({ box: [cx - 150, cy - 100, cx + 50, cy + 120], label: 2, score: 0.94 });
-                            }
-                            if (fname.includes('scratch')) {
-                                mockInstances.push({ box: [cx - 80, cy - 20, cx + 180, cy + 10], label: 3, score: 0.88 });
-                            }
-                            if (fname.includes('stain')) {
-                                mockInstances.push({ box: [cx + 20, cy + 40, cx + 160, cy + 180], label: 4, score: 0.96 });
-                            }
-                            if (fname.includes('dent')) {
-                                mockInstances.push({ box: [cx - 60, cy - 50, cx + 40, cy + 50], label: 5, score: 0.89 });
-                            }
-                            data.instances = mockInstances;
-                            
-                        } else if (data.instances) {
+                        // Use actual model predictions
+                        if (data.instances) {
                             // Filter mode collapse (identical bounding boxes repeated due to weak model training)
                             const uniqueInstances = [];
                             const seenBoxes = new Set();
